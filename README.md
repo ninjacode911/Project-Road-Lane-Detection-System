@@ -125,8 +125,3 @@ Special thanks to the **Ultralytics** and **HuggingFace** teams for the neural a
 
 **Navnit** - *AI MLOps Engineer*
 [GitHub Profile](https://github.com/ninjacode911)
-
-<div align="center">
-  <b></b><br>
-  <sub>Made By Navnit(Ninjacode911)</sub>
-</div>
