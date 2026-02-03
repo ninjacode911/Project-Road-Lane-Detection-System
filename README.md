@@ -83,7 +83,8 @@ web/
 config/
 └── config.py            # Pydantic-based Settings Management
 ```
-
+## Disclaimer 
+**I have added a test .pt model named 'yolov8n-seg.pt' , its just for testing, it lacks high accuracy and hence should not be used anything other than testing. Training your own model for inference is recommended.**
 ---
 
 ##  Performance Benchmarks
