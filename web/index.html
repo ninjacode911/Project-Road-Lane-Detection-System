@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEURAL-LANE | 2026 ADAS System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --neon-cyan: #0ff;
+            --neon-magenta: #f0f;
+            --neon-purple: #bc13fe;
+            --glass-bg: rgba(15, 23, 42, 0.7);
+            --bg-dark: #020617;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: #e2e8f0;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 10% 20%, rgba(217, 70, 239, 0.1) 0%, transparent 40%);
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+
+        .neon-border {
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+        }
+
+        .neon-text-cyan {
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .neon-text-magenta {
+            text-shadow: 0 0 10px rgba(240, 0, 240, 0.5);
+        }
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 10;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0) 100%);
+            opacity: 0.1;
+            position: fixed;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% {
+                top: -100px;
+            }
+
+            100% {
+                top: 100%;
+            }
+        }
+
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            perspective: 1000px;
+            transform: rotateX(60deg) scale(2);
+            transform-origin: top;
+            opacity: 0.3;
+        }
+
+        .upload-gradient {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(217, 70, 239, 0.1) 100%);
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid var(--neon-cyan);
+        }
+
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 255, 0.4);
+        }
+
+        .stat-card {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+    </style>
+</head>
+
+<body class="custom-scrollbar">
+    <div class="scanline"></div>
+    <div class="grid-bg"></div>
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 glass border-r border-slate-800 flex flex-col z-20 hidden md:flex">
+            <div class="p-6">
+                <div class="flex items-center space-x-3 mb-10">
+                    <div class="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center neon-border">
+                        <i data-lucide="shield" class="text-white w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-xl tracking-tighter text-white">NEURAL-<span
+                                class="text-cyan-400">LANE</span></h1>
+                        <p class="text-[10px] mono text-cyan-500 font-bold uppercase tracking-widest">v2.0.0-CORE</p>
+                    </div>
+                </div>
+
+                <nav class="space-y-4">
+                    <a href="#" id="dashboardBtn"
+                        class="sidebar-item flex items-center space-x-3 p-3 rounded-lg text-cyan-400 font-semibold bg-cyan-500/10 border-l-2 border-cyan-400">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" id="historyBtn"
+                        class="sidebar-item flex items-center space-x-3 p-3 rounded-lg text-slate-400 font-semibold transition-all">
+                        <i data-lucide="history" class="w-5 h-5"></i>
+                        <span>Inference History</span>
+                    </a>
+                    <a href="/docs" target="_blank"
+                        class="sidebar-item flex items-center space-x-3 p-3 rounded-lg text-slate-400 font-semibold transition-all">
+                        <i data-lucide="terminal" class="w-5 h-5"></i>
+                        <span>API Terminal</span>
+                    </a>
+                    <a href="#" id="settingsBtn"
+                        class="sidebar-item flex items-center space-x-3 p-3 rounded-lg text-slate-400 font-semibold transition-all">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                        <span>System Settings</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="mt-auto p-6">
+                <div class="glass p-4 rounded-xl border border-cyan-500/20">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase mono">Neural Core</span>
+                        <div class="w-2 h-2 rounded-full bg-green-500 status-pulse"></div>
+                    </div>
+                    <div class="h-2 bg-slate-800 rounded-full overflow-hidden mb-2">
+                        <div class="w-3/4 h-full bg-gradient-to-r from-cyan-500 to-purple-500"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mono text-center">FP16 OPTIMIZED @ 12.1 CUDA</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto relative p-4 md:p-8 custom-scrollbar">
+            <!-- Top Bar -->
+            <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 space-y-4 md:space-y-0">
+                <div>
+                    <h2
+                        class="text-3xl font-extrabold text-white tracking-tight neon-text-cyan underline decoration-cyan-500 decoration-4 underline-offset-8">
+                        Vision Protocol <span class="text-slate-500 font-light">0861</span></h2>
+                    <p class="text-slate-400 mt-2">Remote Sensing & Lane Segmentation Engine</p>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <div class="flex -space-x-2">
+                        <div
+                            class="w-8 h-8 rounded-full border-2 border-slate-900 bg-cyan-600 flex items-center justify-center text-[10px] font-bold">
+                            Y8</div>
+                        <div
+                            class="w-8 h-8 rounded-full border-2 border-slate-900 bg-purple-600 flex items-center justify-center text-[10px] font-bold">
+                            ENS</div>
+                        <div
+                            class="w-8 h-8 rounded-full border-2 border-slate-900 bg-slate-700 flex items-center justify-center text-[10px] font-bold">
+                            +</div>
+                    </div>
+                    <div class="h-10 w-[1px] bg-slate-800"></div>
+                    <button id="liveStreamBtn"
+                        class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold px-6 py-2 rounded-full transition-all flex items-center space-x-2 shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                        <i data-lucide="zap" class="w-4 h-4"></i>
+                        <span>LIVE STREAM</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Grid Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                <!-- Input Node -->
+                <section class="lg:col-span-12 xl:col-span-5 space-y-6">
+                    <div class="glass p-8 rounded-3xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <i data-lucide="cpu" class="w-24 h-24 text-cyan-400"></i>
+                        </div>
+
+                        <h3 class="flex items-center space-x-2 text-xl font-bold mb-6">
+                            <i data-lucide="upload-cloud" class="text-cyan-400"></i>
+                            <span>Ingest Media Node</span>
+                        </h3>
+
+                        <div id="dropZone"
+                            class="upload-area border-2 border-dashed border-slate-700 rounded-2xl p-10 text-center cursor-pointer hover:border-cyan-500 transition-all upload-gradient group">
+                            <input type="file" id="fileInput" class="hidden" accept="image/*,video/*">
+                            <div
+                                class="w-20 h-20 bg-slate-900/50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform border border-slate-800">
+                                <i data-lucide="file-plus"
+                                    class="w-10 h-10 text-slate-500 group-hover:text-cyan-400 transition-colors"></i>
+                            </div>
+                            <p class="text-slate-300 font-semibold text-lg mb-2">Drop Neural Stream File</p>
+                            <p class="text-slate-500 text-sm mono uppercase tracking-widest mb-6">IMG / VID / RAW</p>
+                            <button type="button" onclick="document.getElementById('fileInput').click()"
+                                class="bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded-xl font-bold transition-all border border-slate-700">MANUAL
+                                SELECT</button>
+                        </div>
+
+                        <!-- Config Node -->
+                        <div class="mt-8 grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-slate-900/50 rounded-2xl border border-slate-800">
+                                <label
+                                    class="block text-[10px] mono uppercase text-slate-500 font-bold mb-2 tracking-widest">Protocol
+                                    Type</label>
+                                <select id="methodSelect"
+                                    class="bg-transparent text-white font-bold w-full outline-none">
+                                    <option value="yolo">YOLOv8-SEG</option>
+                                    <option value="segformer">SEGFORMER-TRANSFORMER</option>
+                                    <option value="traditional">CLASSIC-CV</option>
+                                    <option value="ensemble">ENSEMBLE-CORE</option>
+                                </select>
+                            </div>
+                            <div class="p-4 bg-slate-900/50 rounded-2xl border border-slate-800">
+                                <label
+                                    class="block text-[10px] mono uppercase text-slate-500 font-bold mb-2 tracking-widest">Confidence
+                                    Threshold</label>
+                                <div class="flex items-center space-x-3">
+                                    <input type="range" id="confRange" min="0" max="100" value="50"
+                                        class="flex-1 accent-cyan-500">
+                                    <span id="confValue" class="mono text-cyan-400 font-bold w-10">0.5</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="statusContainer" class="mt-6 hidden">
+                            <div
+                                class="flex items-center space-x-3 p-4 bg-cyan-500/10 border border-cyan-500/20 rounded-xl">
+                                <div class="w-3 h-3 bg-cyan-400 rounded-full status-pulse"></div>
+                                <span class="mono text-xs text-cyan-400 font-bold uppercase tracking-wider"
+                                    id="statusText">Processing Stream...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Diagnostics -->
+                    <div class="glass p-8 rounded-3xl border-l-4 border-purple-500">
+                        <h3 class="text-xl font-bold mb-6 flex items-center justify-between">
+                            <span>Diagnostic Matrix</span>
+                            <i data-lucide="bar-chart-3" class="text-purple-400"></i>
+                        </h3>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="stat-card bg-slate-900/40 p-5 rounded-2xl border border-slate-800/50">
+                                <p class="text-slate-500 text-xs font-bold uppercase mono tracking-widest mb-1">Latency
+                                </p>
+                                <div class="flex items-baseline space-x-1">
+                                    <span class="text-3xl font-extrabold text-white" id="latencyVal">--</span>
+                                    <span class="text-xs text-slate-500 mono italic font-bold">ms</span>
+                                </div>
+                                <div class="mt-3 h-1 bg-slate-800 rounded-full">
+                                    <div class="h-full bg-cyan-500 w-1/2 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div class="stat-card bg-slate-900/40 p-5 rounded-2xl border border-slate-800/50">
+                                <p class="text-slate-500 text-xs font-bold uppercase mono tracking-widest mb-1">Frame
+                                    Speed</p>
+                                <div class="flex items-baseline space-x-1">
+                                    <span class="text-3xl font-extrabold text-white" id="fpsVal">--</span>
+                                    <span class="text-xs text-slate-500 mono italic font-bold">fps</span>
+                                </div>
+                                <div class="mt-3 h-1 bg-slate-800 rounded-full">
+                                    <div class="h-full bg-purple-500 w-3/4 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div class="stat-card bg-slate-900/40 p-5 rounded-2xl border border-slate-800/50">
+                                <p class="text-slate-500 text-xs font-bold uppercase mono tracking-widest mb-1">Lane
+                                    Metrics</p>
+                                <div class="flex items-baseline space-x-1">
+                                    <span class="text-3xl font-extrabold text-white" id="lanesVal">--</span>
+                                    <span class="text-xs text-slate-500 mono italic font-bold">units</span>
+                                </div>
+                            </div>
+                            <div class="stat-card bg-slate-900/40 p-5 rounded-2xl border border-slate-800/50">
+                                <p class="text-slate-500 text-xs font-bold uppercase mono tracking-widest mb-1">
+                                    Confidence</p>
+                                <div class="flex items-baseline space-x-1">
+                                    <span class="text-3xl font-extrabold text-white" id="confVal">--</span>
+                                    <span class="text-xs text-slate-500 mono italic font-bold">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Processing Output -->
+                <section class="lg:col-span-12 xl:col-span-7 space-y-8">
+                    <div class="glass p-2 md:p-6 rounded-[2.5rem] relative overflow-hidden min-h-[500px] flex flex-col">
+                        <div class="flex items-center justify-between p-4 mb-2">
+                            <span
+                                class="text-xs font-bold mono tracking-widest uppercase text-slate-500 flex items-center bg-slate-900/80 px-4 py-2 rounded-full border border-slate-800">
+                                <span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-2 status-pulse"></span>
+                                INF-OUTPUT-NODE :: PRIMARY
+                            </span>
+                            <div class="flex space-x-2">
+                                <button
+                                    class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                                    <i data-lucide="maximize-2" class="w-4 h-4"></i>
+                                </button>
+                                <button
+                                    class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="outputContainer"
+                            class="flex-1 bg-slate-950/50 rounded-[1.5rem] border border-slate-800/50 overflow-hidden relative flex flex-col items-center justify-center p-4">
+                            <!-- Placeholder -->
+                            <div id="placeholderView" class="text-center group">
+                                <div
+                                    class="w-32 h-32 mx-auto mb-6 bg-slate-900/30 rounded-full flex items-center justify-center border-4 border-dashed border-slate-800 group-hover:border-cyan-500/50 transition-all">
+                                    <i data-lucide="eye"
+                                        class="w-12 h-12 text-slate-700 group-hover:text-cyan-500/50 transition-all"></i>
+                                </div>
+                                <h4
+                                    class="text-xl font-bold text-slate-600 group-hover:text-slate-400 mb-2 transition-all">
+                                    Await Input Node</h4>
+                                <p
+                                    class="text-slate-700 mono text-xs tracking-widest group-hover:text-slate-500 transition-all uppercase">
+                                    Ready for Neural Sync</p>
+                            </div>
+
+                            <!-- Image View -->
+                            <div id="imageView" class="hidden w-full h-full flex items-center justify-center">
+                                <img src="" id="detectedImage" class="max-w-full max-h-[600px] rounded-xl shadow-2xl">
+                            </div>
+
+                            <!-- Video View -->
+                            <div id="videoView" class="hidden w-full h-full flex flex-col items-center justify-center">
+                                <video id="detectedVideo" controls
+                                    class="max-w-full max-h-[600px] rounded-xl shadow-2xl"></video>
+                            </div>
+
+                            <!-- Neural Overlay Mask (Optionally show sidebar) -->
+                            <div id="maskFab" class="absolute bottom-6 left-6 hidden flex space-x-2">
+                                <button onclick="toggleMask()"
+                                    class="bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/50 text-purple-400 px-4 py-2 rounded-full text-xs font-bold mono tracking-widest backdrop-blur-md transition-all">TOGGLE
+                                    SEG-MASK</button>
+                                <button onclick="downloadResult()"
+                                    class="bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-400 px-4 py-2 rounded-full text-xs font-bold mono tracking-widest backdrop-blur-md transition-all">
+                                    DOWNLOAD</button>
+                            </div>
+
+                            <!-- Mask View overlay -->
+                            <div id="maskOverlay"
+                                class="absolute inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-10">
+                                <div class="relative max-w-[90%] max-h-[90%]">
+                                    <button onclick="toggleMask()"
+                                        class="absolute -top-4 -right-4 w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg"><i
+                                            data-lucide="x"></i></button>
+                                    <img src="" id="maskImage" class="rounded-xl border border-purple-500/50">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Processing Timeline (Dummy for aesthetic) -->
+                        <div class="mt-6 p-4">
+                            <div
+                                class="flex items-center justify-between text-[10px] mono text-slate-600 uppercase font-black tracking-widest mb-3">
+                                <span>Timeline Sequence</span>
+                                <span id="timecode">00:00:00:00</span>
+                            </div>
+                            <div class="h-8 bg-slate-900/50 rounded-lg flex items-center space-x-1 p-1">
+                                <div
+                                    class="flex-1 h-full bg-cyan-900/20 rounded flex items-center overflow-hidden border border-cyan-800/10">
+                                    <div class="w-1/4 h-full bg-cyan-500/50"></div>
+                                    <div class="w-1/2 h-full bg-cyan-500/20"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notifications Toast -->
+    <div id="toast"
+        class="fixed bottom-8 right-8 z-[100] transform translate-y-20 opacity-0 transition-all duration-300">
+        <div
+            class="glass border-l-4 border-red-500 p-4 rounded-xl flex items-center space-x-4 shadow-2xl min-w-[300px]">
+            <div class="bg-red-500/20 p-2 rounded-lg">
+                <i data-lucide="alert-triangle" class="text-red-500 w-6 h-6"></i>
+            </div>
+            <div>
+                <h5 class="text-white font-bold" id="toastTitle">Error Protocol</h5>
+                <p class="text-slate-400 text-sm" id="toastMsg">Interface sync failed.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 z-[200] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeSettings()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div
+                class="glass max-w-2xl w-full p-8 rounded-3xl relative z-10 max-h-[90vh] overflow-y-auto custom-scrollbar">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-white flex items-center space-x-2">
+                        <i data-lucide="settings" class="text-cyan-400"></i>
+                        <span>System Settings</span>
+                    </h2>
+                    <button onclick="closeSettings()" class="text-slate-400 hover:text-white transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Default Method -->
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <label class="block text-sm font-bold text-slate-400 mb-2">Default Detection Method</label>
+                        <select id="settingsDefaultMethod"
+                            class="w-full bg-slate-800 text-white p-3 rounded-lg border border-slate-700 focus:border-cyan-500 outline-none">
+                            <option value="yolo">YOLOv8-SEG (Fast & Accurate)</option>
+                            <option value="segformer">SegFormer Transformer (High Precision)</option>
+                            <option value="traditional">Classic CV (Lightweight)</option>
+                            <option value="ensemble">Ensemble-Core (Maximum Accuracy)</option>
+                        </select>
+                    </div>
+
+                    <!-- Auto-save Results -->
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-400 mb-1">Auto-save Results</label>
+                                <p class="text-xs text-slate-500">Automatically save detection results to history</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="settingsAutoSave" class="sr-only peer" checked>
+                                <div
+                                    class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500">
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Max History Items -->
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <label class="block text-sm font-bold text-slate-400 mb-2">Maximum History Items</label>
+                        <input type="number" id="settingsMaxHistory" value="50" min="10" max="500"
+                            class="w-full bg-slate-800 text-white p-3 rounded-lg border border-slate-700 focus:border-cyan-500 outline-none">
+                        <p class="text-xs text-slate-500 mt-2">Number of detection results to keep in history</p>
+                    </div>
+
+                    <!-- Clear History -->
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-red-900/30">
+                        <label class="block text-sm font-bold text-red-400 mb-2">Danger Zone</label>
+                        <button onclick="clearHistory()"
+                            class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-6 py-2 rounded-lg transition-all border border-red-500/50">
+                            Clear All History
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end space-x-4">
+                    <button onclick="closeSettings()"
+                        class="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-all">Cancel</button>
+                    <button onclick="saveSettings()"
+                        class="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-lg transition-all">Save
+                        Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="fixed inset-0 z-[200] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeHistory()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="glass max-w-4xl w-full p-8 rounded-3xl relative z-10 max-h-[90vh] flex flex-col">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-white flex items-center space-x-2">
+                        <i data-lucide="history" class="text-cyan-400"></i>
+                        <span>Inference History</span>
+                    </h2>
+                    <button onclick="closeHistory()" class="text-slate-400 hover:text-white transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <div id="historyList" class="flex-1 overflow-y-auto custom-scrollbar space-y-4">
+                    <!-- History items will be populated here -->
+                </div>
+
+                <div class="mt-6 text-center text-slate-500 text-sm" id="historyEmpty">
+                    No inference history yet. Process some images or videos to see them here.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Stream Modal -->
+    <div id="liveStreamModal" class="fixed inset-0 z-[200] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeLiveStream()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="glass max-w-6xl w-full p-8 rounded-3xl relative z-10 max-h-[90vh] flex flex-col">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-white flex items-center space-x-2">
+                        <i data-lucide="zap" class="text-cyan-400"></i>
+                        <span>Live Stream Detection</span>
+                    </h2>
+                    <button onclick="closeLiveStream()" class="text-slate-400 hover:text-white transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Camera Selection -->
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <label class="block text-sm font-bold text-slate-400 mb-2">Camera Source</label>
+                        <select id="cameraSelect"
+                            class="w-full bg-slate-800 text-white p-3 rounded-lg border border-slate-700 focus:border-cyan-500 outline-none mb-4">
+                            <option value="">Select Camera...</option>
+                        </select>
+                        <button id="startStreamBtn" onclick="startStream()"
+                            class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-2 rounded-lg transition-all">
+                            Start Stream
+                        </button>
+                        <button id="stopStreamBtn" onclick="stopStream()"
+                            class="w-full bg-red-500 hover:bg-red-400 text-white font-bold py-2 rounded-lg transition-all hidden">
+                            Stop Stream
+                        </button>
+                    </div>
+
+                    <!-- Stream Stats -->
+                    <div class="lg:col-span-2 grid grid-cols-4 gap-4">
+                        <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 text-center">
+                            <div class="text-xs mono text-slate-500 uppercase mb-1">FPS</div>
+                            <div id="streamFps" class="text-2xl font-bold text-cyan-400">0</div>
+                        </div>
+                        <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 text-center">
+                            <div class="text-xs mono text-slate-500 uppercase mb-1">Latency</div>
+                            <div id="streamLatency" class="text-2xl font-bold text-cyan-400">0</div>
+                        </div>
+                        <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 text-center">
+                            <div class="text-xs mono text-slate-500 uppercase mb-1">Frames</div>
+                            <div id="streamFrames" class="text-2xl font-bold text-cyan-400">0</div>
+                        </div>
+                        <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800 text-center">
+                            <div class="text-xs mono text-slate-500 uppercase mb-1">Status</div>
+                            <div id="streamStatus" class="text-2xl font-bold text-slate-400">Idle</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Feed -->
+                <div
+                    class="flex-1 bg-slate-900/50 rounded-xl border border-slate-800 p-4 flex items-center justify-center">
+                    <video id="liveVideoFeed" class="w-full h-full object-contain rounded-lg hidden" autoplay></video>
+                    <canvas id="liveCanvasFeed" class="w-full h-full object-contain rounded-lg hidden"></canvas>
+                    <div id="streamPlaceholder" class="text-center text-slate-500">
+                        <i data-lucide="video-off" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+                        <p class="font-bold">Select a camera and start streaming</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Init Lucide
+        lucide.createIcons();
+
+        const API_BASE = window.location.origin;
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const statusContainer = document.getElementById('statusContainer');
+        const statusText = document.getElementById('statusText');
+        const imageView = document.getElementById('imageView');
+        const videoView = document.getElementById('videoView');
+        const placeholderView = document.getElementById('placeholderView');
+        const detectedImage = document.getElementById('detectedImage');
+        const detectedVideo = document.getElementById('detectedVideo');
+        const maskImage = document.getElementById('maskImage');
+        const maskOverlay = document.getElementById('maskOverlay');
+        const maskFab = document.getElementById('maskFab');
+
+        // Diagnostic nodes
+        const latencyVal = document.getElementById('latencyVal');
+        const fpsVal = document.getElementById('fpsVal');
+        const lanesVal = document.getElementById('lanesVal');
+        const confVal = document.getElementById('confVal');
+        const timecode = document.getElementById('timecode');
+
+        // Config nodes
+        const confRange = document.getElementById('confRange');
+        const confValueDisplay = document.getElementById('confValue');
+        const methodSelect = document.getElementById('methodSelect');
+
+        confRange.addEventListener('input', () => {
+            confValueDisplay.innerText = (confRange.value / 100).toFixed(1);
+        });
+
+        // Drag & Drop
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        ['dragenter', 'dragover'].forEach(e => {
+            dropZone.addEventListener(e, (evt) => {
+                evt.preventDefault();
+                dropZone.classList.add('border-cyan-400', 'bg-cyan-500/5');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(e => {
+            dropZone.addEventListener(e, (evt) => {
+                evt.preventDefault();
+                dropZone.classList.remove('border-cyan-400', 'bg-cyan-500/5');
+            });
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const file = e.dataTransfer.files[0];
+            if (file) handleUpload(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleUpload(file);
+        });
+
+        async function handleUpload(file) {
+            const isImage = file.type.startsWith('image/');
+            const isVideo = file.type.startsWith('video/');
+
+            if (!isImage && !isVideo) {
+                showToast('Protocol Error', 'Media format unrecognized.');
+                return;
+            }
+
+            // UI Reset
+            statusContainer.classList.remove('hidden');
+            statusText.innerText = `Ingesting ${file.name}...`;
+            placeholderView.classList.add('hidden');
+            imageView.classList.add('hidden');
+            videoView.classList.add('hidden');
+            maskFab.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Add config
+            const method = methodSelect.value;
+            const threshold = confRange.value / 100;
+
+            try {
+                const endpoint = isImage ? '/detect/image' : '/detect/video';
+                statusText.innerText = `Neural Processing @ ${method.toUpperCase()}...`;
+
+                const startTime = performance.now();
+                const response = await fetch(`${API_BASE}${endpoint}?method=${method}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('API Sync Failed');
+
+                const data = await response.json();
+                const totalLatency = performance.now() - startTime;
+
+                if (isImage) {
+                    renderImageResults(data, totalLatency);
+                } else {
+                    renderVideoResults(data);
+                }
+
+                if (data.warning && data.warning !== "None") {
+                    showToast('Safety Alert', data.warning, 'bg-yellow-500');
+                } else {
+                    showToast('Sync Successful', 'Neural output generated.', 'bg-green-500');
+                }
+                statusContainer.classList.add('hidden');
+
+            } catch (err) {
+                console.error(err);
+                statusContainer.classList.add('hidden');
+                placeholderView.classList.remove('hidden');
+                showToast('Kernel Panic', err.message);
+            }
+        }
+
+        function renderImageResults(data, totalLatency) {
+            detectedImage.src = `${API_BASE}${data.image_url}?t=${Date.now()}`;
+            maskImage.src = `${API_BASE}${data.mask_url}?t=${Date.now()}`;
+
+            imageView.classList.remove('hidden');
+            maskFab.classList.remove('hidden');
+
+            // Diagnostics
+            latencyVal.innerText = (data.processing_time * 1000).toFixed(0);
+            fpsVal.innerText = data.fps.toFixed(1);
+            lanesVal.innerText = data.num_lanes;
+
+            const avgConf = data.confidences.length > 0
+                ? (data.confidences.reduce((a, b) => a + b, 0) / data.confidences.length * 100).toFixed(0)
+                : 0;
+            confVal.innerText = avgConf;
+
+            // Advanced Metrics (Curvature and Offset)
+            // Curvature is usually in meters, center offset in meters
+            if (data.curvature) {
+                // Overriding the confidence label slightly for presentation if curvature exists
+                // But let's keep it clean: update the diagnostic cards
+                lanesVal.innerText = data.num_lanes;
+                latencyVal.innerText = (data.processing_time * 1000).toFixed(0);
+
+                // If we want to show curvature/offset specifically, we can use the existing slots
+                // Let's repurpose 'Lane Metrics' for Curvature and 'Confidence' for Offset if available
+                lanesVal.innerText = (data.curvature / 1000).toFixed(2) + 'k';
+                confVal.innerText = data.offset.toFixed(2);
+            }
+
+            updateTimecode();
+        }
+
+        function renderVideoResults(data) {
+            detectedVideo.src = `${API_BASE}${data.video_url}`;
+            videoView.classList.remove('hidden');
+            detectedVideo.load();
+            detectedVideo.play();
+
+            // Diagnostics from stats
+            latencyVal.innerText = '-';
+            fpsVal.innerText = data.stats.processed_fps ? data.stats.processed_fps.toFixed(1) : data.stats.average_fps.toFixed(1);
+            lanesVal.innerText = '~';
+            confVal.innerText = '--';
+
+            updateTimecode();
+        }
+
+        function toggleMask() {
+            maskOverlay.classList.toggle('hidden');
+        }
+
+        function showToast(title, msg, colorClass = 'bg-red-500') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMsg').innerText = msg;
+
+            toast.firstElementChild.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--neon-cyan');
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 5000);
+        }
+
+        function updateTimecode() {
+            const now = new Date();
+            timecode.innerText = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}:12`;
+        }
+
+        // ========== MODAL CONTROLS ==========
+
+        // Settings Modal
+        function openSettings() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+            loadSettings();
+            lucide.createIcons();
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('laneDetectionSettings') || '{}');
+            document.getElementById('settingsDefaultMethod').value = settings.defaultMethod || 'yolo';
+            document.getElementById('settingsAutoSave').checked = settings.autoSave !== false;
+            document.getElementById('settingsMaxHistory').value = settings.maxHistory || 50;
+        }
+
+        function saveSettings() {
+            const settings = {
+                defaultMethod: document.getElementById('settingsDefaultMethod').value,
+                autoSave: document.getElementById('settingsAutoSave').checked,
+                maxHistory: parseInt(document.getElementById('settingsMaxHistory').value)
+            };
+            localStorage.setItem('laneDetectionSettings', JSON.stringify(settings));
+
+            // Apply default method
+            methodSelect.value = settings.defaultMethod;
+
+            showToast('Settings Saved', 'Configuration updated successfully', 'bg-green-500');
+            closeSettings();
+        }
+
+        // History Modal
+        function openHistory() {
+            document.getElementById('historyModal').classList.remove('hidden');
+            renderHistory();
+            lucide.createIcons();
+        }
+
+        function closeHistory() {
+            document.getElementById('historyModal').classList.add('hidden');
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('laneDetectionHistory') || '[]');
+            const historyList = document.getElementById('historyList');
+            const historyEmpty = document.getElementById('historyEmpty');
+
+            if (history.length === 0) {
+                historyList.innerHTML = '';
+                historyEmpty.classList.remove('hidden');
+                return;
+            }
+
+            historyEmpty.classList.add('hidden');
+            historyList.innerHTML = history.slice(-20).reverse().map((item, idx) => `
+                <div class="glass p-4 rounded-xl flex items-center space-x-4">
+                    <div class="w-20 h-20 bg-slate-800 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                        <i data-lucide="${item.type === 'image' ? 'image' : 'video'}" class="w-8 h-8 text-slate-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-white text-sm truncate max-w-[300px]">${item.filename}</h4>
+                        <p class="text-[10px] text-slate-400 mono">${new Date(item.timestamp).toLocaleString()}</p>
+                        <div class="flex items-center space-x-4 mt-2 text-[10px] text-slate-500">
+                            <span class="mono">Protocol: ${item.method.toUpperCase()}</span>
+                            <span class="mono">Lanes: ${item.numLanes}</span>
+                            <span class="mono">Time: ${(item.processingTime * 1000).toFixed(0)}ms</span>
+                        </div>
+                    </div>
+                    <button onclick="deleteHistoryItem(${history.length - 1 - idx})" class="text-slate-500 hover:text-red-400 transition-colors">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="reloadHistoryItem(${history.length - 1 - idx})" class="bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 p-2 rounded-lg transition-all">
+                        <i data-lucide="external-link" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function addToHistory(item) {
+            const settings = JSON.parse(localStorage.getItem('laneDetectionSettings') || '{}');
+            if (settings.autoSave === false) return;
+
+            const history = JSON.parse(localStorage.getItem('laneDetectionHistory') || '[]');
+            const maxHistory = settings.maxHistory || 50;
+
+            history.push({
+                ...item,
+                timestamp: Date.now()
+            });
+
+            if (history.length > maxHistory) {
+                history.splice(0, history.length - maxHistory);
+            }
+
+            localStorage.setItem('laneDetectionHistory', JSON.stringify(history));
+        }
+
+        function deleteHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem('laneDetectionHistory') || '[]');
+            history.splice(index, 1);
+            localStorage.setItem('laneDetectionHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function clearHistory() {
+            if (confirm('Clear neural interface history cache?')) {
+                localStorage.setItem('laneDetectionHistory', '[]');
+                renderHistory();
+                showToast('Cache Purged', 'History cleared successfully', 'bg-cyan-500');
+            }
+        }
+
+        // Live Stream Modal
+        let ws = null;
+        let streamActive = false;
+        let localStream = null;
+
+        function openLiveStream() {
+            document.getElementById('liveStreamModal').classList.remove('hidden');
+            enumerateCameras();
+            lucide.createIcons();
+        }
+
+        function closeLiveStream() {
+            if (streamActive) stopStream();
+            document.getElementById('liveStreamModal').classList.add('hidden');
+        }
+
+        async function enumerateCameras() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const cameras = devices.filter(device => device.kind === 'videoinput');
+                const cameraSelect = document.getElementById('cameraSelect');
+
+                cameraSelect.innerHTML = '<option value="">Select Sensor...</option>';
+                cameras.forEach((camera, idx) => {
+                    const option = document.createElement('option');
+                    option.value = camera.deviceId;
+                    option.text = camera.label || `Sensor ${idx + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+            } catch (err) {
+                showToast('System Error', 'Could not access optical sensors.');
+            }
+        }
+
+        async function startStream() {
+            const deviceId = document.getElementById('cameraSelect').value;
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: deviceId ? { exact: deviceId } : undefined }
+                });
+
+                const video = document.getElementById('liveVideoFeed');
+                video.srcObject = localStream;
+                video.classList.remove('hidden');
+                document.getElementById('streamPlaceholder').classList.add('hidden');
+
+                // WebSocket Connection
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                ws = new WebSocket(`${protocol}//${window.location.host}/ws/stream`);
+
+                ws.onopen = () => {
+                    streamActive = true;
+                    document.getElementById('streamStatus').innerText = 'Connected';
+                    document.getElementById('streamStatus').classList.add('text-green-500');
+                    document.getElementById('startStreamBtn').classList.add('hidden');
+                    document.getElementById('stopStreamBtn').classList.remove('hidden');
+                    processStreamFrames();
+                };
+
+                ws.onmessage = (e) => {
+                    const data = JSON.parse(e.data);
+                    const canvas = document.getElementById('liveCanvasFeed');
+                    canvas.classList.remove('hidden');
+                    const ctx = canvas.getContext('2d');
+                    const img = new Image();
+                    img.onload = () => {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                    };
+                    img.src = 'data:image/jpeg;base64,' + data.image;
+
+                    document.getElementById('streamFps').innerText = (1000 / data.latency_ms).toFixed(1);
+                    document.getElementById('streamLatency').innerText = data.latency_ms.toFixed(0);
+                };
+
+                ws.onclose = () => stopStream();
+
+            } catch (err) {
+                showToast('Stream Panic', 'Optical sync failed.');
+            }
+        }
+
+        function processStreamFrames() {
+            if (!streamActive || !ws || ws.readyState !== 1) return;
+
+            const video = document.getElementById('liveVideoFeed');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    blob.arrayBuffer().then(buffer => {
+                        if (ws && ws.readyState === 1) ws.send(buffer);
+                    });
+                }
+                setTimeout(processStreamFrames, 100); // 10 FPS for stability
+            }, 'image/jpeg', 0.8);
+        }
+
+        function stopStream() {
+            streamActive = false;
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+            }
+            document.getElementById('liveVideoFeed').classList.add('hidden');
+            document.getElementById('liveCanvasFeed').classList.add('hidden');
+            document.getElementById('streamPlaceholder').classList.remove('hidden');
+            document.getElementById('startStreamBtn').classList.remove('hidden');
+            document.getElementById('stopStreamBtn').classList.add('hidden');
+            document.getElementById('streamStatus').innerText = 'Idle';
+            document.getElementById('streamStatus').classList.remove('text-green-500');
+        }
+
+        // ========== BINDINGS ==========
+        document.getElementById('dashboardBtn').onclick = (e) => { e.preventDefault(); location.reload(); };
+        document.getElementById('historyBtn').onclick = (e) => { e.preventDefault(); openHistory(); };
+        document.getElementById('settingsBtn').onclick = (e) => { e.preventDefault(); openSettings(); };
+        document.getElementById('liveStreamBtn').onclick = () => openLiveStream();
+
+        // Integrate with handleUpload
+        const _origHandleUpload = handleUpload;
+        handleUpload = async function (file) {
+            const result = await _origHandleUpload(file);
+            // Result is handled internally by render functions which we will wrap
+            return result;
+        };
+
+        const _origRenderImage = renderImageResults;
+        renderImageResults = function (data, totalLatency) {
+            _origRenderImage(data, totalLatency);
+            addToHistory({
+                type: 'image',
+                filename: 'neural_scan_' + Date.now().toString().slice(-6),
+                method: methodSelect.value,
+                numLanes: data.num_lanes,
+                processingTime: data.processing_time
+            });
+        };
+
+        // Periodic diagnostic updates
+        setInterval(() => {
+            if (!placeholderView.classList.contains('hidden')) {
+                updateTimecode();
+            }
+        }, 1000);
+
+        // Helper to download results
+        window.downloadResult = function () {
+            const isVid = !videoView.classList.contains('hidden');
+            const src = isVid ? detectedVideo.src : detectedImage.src;
+            if (!src) return;
+            const a = document.createElement('a');
+            a.href = src;
+            a.download = 'neural_result_' + Date.now() + (isVid ? '.mp4' : '.jpg');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('Download Initiated', 'Result saved to local disk.', 'bg-cyan-500');
+        };
+
+        window.reloadHistoryItem = function (index) {
+            const history = JSON.parse(localStorage.getItem('laneDetectionHistory') || '[]');
+            const item = history[index];
+            if (!item) return;
+            showToast('Historic Trace', 'Viewing metadata snapshot. Re-upload for interactive analysis.', 'bg-purple-500');
+            lanesVal.innerText = item.numLanes;
+            latencyVal.innerText = (item.processingTime * 1000).toFixed(0);
+            methodSelect.value = item.method;
+            closeHistory();
+        };
+
+        // Load Persisted Settings
+        loadSettings();
+    </script>
+</body>
+
+</html>

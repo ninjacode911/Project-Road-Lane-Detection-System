@@ -1,0 +1,91 @@
+# ==============================================================================
+# Road Lane Detection System - 2026 Modern Dependencies
+# Python 3.10+ Required (Tested on 3.12.7)
+# ==============================================================================
+
+# Core Deep Learning Frameworks
+# ------------------------------------------------------------------------------
+torch>=2.2.0,<3.0.0                    # PyTorch - Main DL framework
+torchvision>=0.17.0,<1.0.0             # Computer vision models & utilities
+ultralytics>=8.1.0                     # YOLOv8 for real-time detection
+transformers>=4.37.0                   # HuggingFace transformers
+timm>=0.9.16                           # PyTorch Image Models
+segmentation-models-pytorch>=0.3.3     # Semantic segmentation models
+
+# Computer Vision & Image Processing
+# ------------------------------------------------------------------------------
+opencv-python>=4.9.0.80                # OpenCV - core CV library
+opencv-contrib-python>=4.9.0.80        # OpenCV additional modules
+albumentations>=1.4.0                  # Advanced data augmentation
+kornia>=0.7.1                          # Differentiable computer vision
+scikit-image>=0.22.0                   # Image processing algorithms
+Pillow>=10.2.0                         # Image I/O
+
+# Scientific Computing
+# ------------------------------------------------------------------------------
+numpy>=1.26.4,<2.0.0                   # Numerical computing
+pandas>=2.2.0                          # Data manipulation
+scipy>=1.12.0                          # Scientific algorithms
+
+# Web Framework & API
+# ------------------------------------------------------------------------------
+fastapi>=0.109.0                       # Modern web framework
+uvicorn[standard]>=0.27.0              # ASGI server
+websockets>=12.0                       # WebSocket support
+python-multipart>=0.0.9                # File upload handling
+pydantic>=2.6.0                        # Data validation
+pydantic-settings>=2.1.0               # Settings management
+
+# Video Processing
+# ------------------------------------------------------------------------------
+moviepy>=1.0.3                         # Video editing
+imageio>=2.34.0                        # Image/video I/O
+imageio-ffmpeg>=0.4.9                  # FFmpeg wrapper
+
+# Visualization & Plotting
+# ------------------------------------------------------------------------------
+matplotlib>=3.8.2                      # Plotting library
+seaborn>=0.13.2                        # Statistical visualizations
+plotly>=5.18.0                         # Interactive plots
+
+# Progress & Logging
+# ------------------------------------------------------------------------------
+tqdm>=4.66.0                           # Progress bars
+loguru>=0.7.2                          # Better logging
+rich>=13.7.0                           # Terminal formatting
+
+# Utilities
+# ------------------------------------------------------------------------------
+python-dotenv>=1.0.0                   # Environment variables
+pyyaml>=6.0.1                          # YAML config files
+requests>=2.31.0                       # HTTP requests
+aiofiles>=23.2.1                       # Async file operations
+
+# Model Optimization & Deployment
+# ------------------------------------------------------------------------------
+onnx>=1.15.0                           # ONNX model export
+onnxruntime-gpu>=1.17.0                # ONNX inference (GPU)
+# onnxruntime>=1.17.0                  # ONNX inference (CPU only - uncomment if no GPU)
+
+# Development & Testing
+# ------------------------------------------------------------------------------
+pytest>=8.0.0                          # Testing framework
+pytest-cov>=4.1.0                      # Coverage reports
+pytest-asyncio>=0.23.4                 # Async test support
+black>=24.1.0                          # Code formatting
+isort>=5.13.2                          # Import sorting
+mypy>=1.8.0                            # Static type checking
+ruff>=0.2.0                            # Fast linter
+pre-commit>=3.6.0                      # Git hooks
+
+# Jupyter & Notebooks
+# ------------------------------------------------------------------------------
+jupyter>=1.0.0                         # Jupyter notebooks
+ipywidgets>=8.1.1                      # Interactive widgets
+notebook>=7.0.7                        # Notebook interface
+
+# Optional: MLOps & Experiment Tracking
+# ------------------------------------------------------------------------------
+# mlflow>=2.10.0                       # Experiment tracking
+# wandb>=0.16.2                        # Weights & Biases
+# tensorboard>=2.16.0                  # TensorBoard logging
