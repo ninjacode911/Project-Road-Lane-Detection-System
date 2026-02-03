@@ -1,3 +1,10 @@
+
+
+<div align="center">
+
+<img width="100%" alt="GHBanner" src="https://github.com/ninjacode911/Github/raw/main/NAVNIT%20background.png" />
+
+
 # 🛣️ Road Lane Detection System
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
