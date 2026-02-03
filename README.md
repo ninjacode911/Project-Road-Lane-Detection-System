@@ -9,6 +9,21 @@
 
 ---
 
+##  Visual Showcase
+
+<div align="center">
+  <img src="Screenshot1.png" width="45%" alt="Neural Dashboard">
+  <img src="Screenshot2.png" width="45%" alt="Detection Stream">
+  <br>
+  <img src="Screenshot3.png" width="45%" alt="Ensemble Mode">
+  <img src="Screenshot4.png" width="45%" alt="Settings Interface">
+  <br>
+  <img src="Screenshot5.png" width="45%" alt="History Logs">
+  <img src="Screenshot6.png" width="45%" alt="API Terminal">
+</div>
+
+---
+
 ##  System Features
 
 ###  Triple-Layer Neural Core
